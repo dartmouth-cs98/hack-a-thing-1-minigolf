@@ -10,12 +10,14 @@ public class BallController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		rb = GetComponent<Rigidbody> ();
-		thrust = 500; 
+		thrust = 5f; 
 	}
-	
-	// Update is called once per frame
-	void OnMouseDown () {
-		rb.AddForce(transform.forward * thrust); 
-		rb.useGravity = true; 
+
+	void OnCollisionEnter (Collision col) {
+		print ("collision detected with: " + col.gameObject.name);
+		print ("impulse: " + col.impulse);
+		if (col.gameObject.name == "head") {
+			rb.AddForce(transform.right * thrust);
+		}
 	}
 }

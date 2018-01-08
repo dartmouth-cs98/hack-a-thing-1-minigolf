@@ -4,33 +4,63 @@ using UnityEngine;
 
 public class ClubController : MonoBehaviour {
 
-	public float angleIncrement = .5f;
-	public float upSpeed = 2.0f;
-	public float downSpeed = 100.0f;
+	public Transform apex;
+	public Transform followthrough;
+	public Transform equilibrium;
 
-	public Transform pivot;
+	public float upSpeed;
+	public float downSpeed;
+	public float neutralSpeed;
 
-	// Use this for initialization
+	public enum State {neutral, upswing, downswing};
+	public State currState;
+
 	void Start () {
-		pivot = GetComponent<Transform> ();
-	}
+		print ("Apex rotation is: " + apex.rotation);
+		print ("Club rotation is: " + transform.rotation);
 
-	void OnMouseDown () {
-//		while (pivot.localRotation.eulerAngles.z < 120) {
-//			pivot.RotateAround (pivot.position, -pivot.forward, angleIncrement * upSpeed);
-//		}
+		currState = State.neutral;
+
+		upSpeed = 50.0f;
+		downSpeed = 100.0f;
+		neutralSpeed = 50.0f;
 	}
 
 	void OnMouseUp () {
-
+		if (currState == State.upswing) {
+			currState = State.downswing;
+		}
 	}
 
+	void OnMouseDown () {
+		if (currState == State.neutral) {
+			currState = State.upswing;
+		}
+	}
+
+	// Raise the club while the mouse is held down. Swing the club when the mouse is released
 	void Update () {
-		if (Input.GetMouseButton (0)) {
-			print (pivot.localEulerAngles);
-			if (pivot.localEulerAngles.z > 240 || pivot.localEulerAngles.z < 120) {
-				pivot.RotateAround (pivot.position, -pivot.forward, angleIncrement * upSpeed);
+		float step;
+		switch (currState) {
+		case State.neutral:
+			step = neutralSpeed * Time.deltaTime;
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, equilibrium.rotation, step);
+			break;
+
+		case State.upswing:
+			//print ("State is upswing");
+			// print(transform.eulerAngles);
+			step = upSpeed * Time.deltaTime;
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, apex.rotation, step);
+			break;
+
+		case State.downswing:
+			step = downSpeed * Time.deltaTime;
+			transform.rotation = Quaternion.RotateTowards (transform.rotation, followthrough.rotation, step);
+			if (transform.rotation == followthrough.rotation) {
+				currState = State.neutral;
 			}
+			break;
 		}
 	}
 }
